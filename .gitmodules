@@ -1,0 +1,18 @@
+[submodule "third_party/amass"]
+	path = third_party/amass
+	url = https://github.com/OWASP/Amass.git
+[submodule "third_party/sublist3r"]
+	path = third_party/sublist3r
+	url = https://github.com/aboul3la/Sublist3r.git
+[submodule "third_party/masscan"]
+	path = third_party/masscan
+	url = https://github.com/robertdavidgraham/masscan.git
+[submodule "third_party/dirsearch"]
+	path = third_party/dirsearch
+	url = https://github.com/maurosoria/dirsearch.git
+[submodule "third_party/wfuzz"]
+	path = third_party/wfuzz
+	url = https://github.com/xmendez/wfuzz.git
+[submodule "third_party/sqlmap"]
+	path = third_party/sqlmap
+	url = https://github.com/sqlmapproject/sqlmap.git
