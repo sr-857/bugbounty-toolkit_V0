@@ -1,0 +1,10 @@
+
+version: "3.9"
+services:
+  toolkit:
+    build: .
+    volumes:
+      - ./:/workspace
+    working_dir: /workspace
+    stdin_open: true
+    tty: true

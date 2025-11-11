@@ -1,0 +1,66 @@
+
+#!/usr/bin/env python3
+import argparse, os, subprocess, sys, shutil
+
+TOOLS_MAP = {
+    "sublist3r": "third_party/sublist3r/sublist3r.py",
+    "amass": "third_party/amass",
+    "dirsearch": "third_party/dirsearch/dirsearch.py",
+    "wfuzz": "third_party/wfuzz/wfuzz",
+    "sqlmap": "third_party/sqlmap/sqlmap.py",
+    "nmap": "nmap",
+    "masscan": "masscan",
+    "wpscan": "third_party/wpscan",
+}
+
+def is_executable(path):
+    return os.path.isfile(path) and os.access(path, os.X_OK)
+
+def resolve_tool(tool):
+    entry = TOOLS_MAP.get(tool)
+    if not entry:
+        sys.exit(f"[!] Unknown tool '{tool}'. Edit bin/bbtool to register it.")
+    # If it looks like a file under third_party
+    if "/" in entry and not entry.startswith("/"):
+        p = os.path.abspath(entry)
+        if not os.path.exists(p):
+            sys.exit(f"[!] {tool} not found at {p}. Did you run scripts/add_submodules.sh?")
+        return ["python3", p] if p.endswith(".py") else [p]
+    # Else assume it's on PATH
+    if shutil.which(entry):
+        return [entry]
+    sys.exit(f"[!] '{entry}' not found on PATH. Install it or add as submodule.")
+
+def cmd_run(args):
+    tool_cmd = resolve_tool(args.tool)
+    cmd = tool_cmd + (["--help"] if args.help_only else args.tool_args)
+    print("[*] Running:", " ".join(cmd))
+    subprocess.call(cmd)
+
+def cmd_list(_):
+    print("Known tools:")
+    for k in sorted(TOOLS_MAP):
+        print(" -", k)
+
+def main():
+    ap = argparse.ArgumentParser(prog="bbtool", description="Bug Bounty Toolkit wrapper")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    runp = sub.add_parser("run", help="Run a tool")
+    runp.add_argument("tool", help="tool key (see list)")
+    runp.add_argument("--help-only", action="store_true", help="show tool's help")
+    runp.add_argument("--", dest="tool_args", nargs=argparse.REMAINDER, default=[])
+
+    listp = sub.add_parser("list", help="List registered tools")
+
+    args, extra = ap.parse_known_args()
+    if args.cmd == "run":
+        # Support syntax: bbtool run sublist3r -- -d example.com
+        if args.tool_args and args.tool_args[0] == "--":
+            args.tool_args = args.tool_args[1:]
+        cmd_run(args)
+    elif args.cmd == "list":
+        cmd_list(args)
+
+if __name__ == "__main__":
+    main()
